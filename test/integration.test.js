@@ -91,6 +91,7 @@ test("Release patch, minor and major versions", async (t) => {
   );
   t.log("Commit a chore");
   await gitCommits(["chore: Init repository"], { cwd });
+  await gitPush(authUrl, "master", { cwd });
   t.log("$ semantic-release");
   let { stdout, exitCode } = await execa(cli, [], { env, cwd, extendEnv: false });
   t.regex(stdout, /There are no relevant changes, so no new version is released/);
@@ -114,6 +115,7 @@ test("Release patch, minor and major versions", async (t) => {
 
   t.log("Commit a feature");
   await gitCommits(["feat: Initial commit"], { cwd });
+  await gitPush(authUrl, "master", { cwd });
   t.log("$ semantic-release");
   ({ stdout, exitCode } = await execa(cli, [], { env, cwd, extendEnv: false }));
   t.regex(stdout, new RegExp(`Published GitHub release: release-url/${version}`));
@@ -155,6 +157,7 @@ test("Release patch, minor and major versions", async (t) => {
 
   t.log("Commit a fix");
   await gitCommits(["fix: bar"], { cwd });
+  await gitPush(authUrl, "master", { cwd });
   t.log("$ semantic-release");
   ({ stdout, exitCode } = await execa(cli, [], { env, cwd, extendEnv: false }));
   t.regex(stdout, new RegExp(`Published GitHub release: release-url/${version}`));
@@ -196,6 +199,7 @@ test("Release patch, minor and major versions", async (t) => {
 
   t.log("Commit a feature");
   await gitCommits(["feat: baz"], { cwd });
+  await gitPush(authUrl, "master", { cwd });
   t.log("$ semantic-release");
   ({ stdout, exitCode } = await execa(cli, [], { env, cwd, extendEnv: false }));
   t.regex(stdout, new RegExp(`Published GitHub release: release-url/${version}`));
@@ -239,6 +243,7 @@ test("Release patch, minor and major versions", async (t) => {
   await gitCheckout("next", true, { cwd });
   await gitPush("origin", "next", { cwd });
   await gitCommits(["feat: foo\n\n BREAKING CHANGE: bar"], { cwd });
+  await gitPush(authUrl, "next", { cwd });
   t.log("$ semantic-release");
   ({ stdout, exitCode } = await execa(cli, [], { env: { ...env, TRAVIS_BRANCH: "next" }, cwd, extendEnv: false }));
   t.regex(stdout, new RegExp(`Published GitHub release: release-url/${version}`));
@@ -377,7 +382,7 @@ test("Dry-run", async (t) => {
   const owner = "git";
   // Create a git repository, set the current working directory at the root of the repo
   t.log("Create git repository and package.json");
-  const { cwd, repositoryUrl } = await gitbox.createRepo(packageName);
+  const { cwd, repositoryUrl, authUrl } = await gitbox.createRepo(packageName);
   // Create package.json in repository root
   await writeJson(path.resolve(cwd, "package.json"), {
     name: packageName,
@@ -396,6 +401,7 @@ test("Dry-run", async (t) => {
   const version = "1.0.0";
   t.log("Commit a feature");
   await gitCommits(["feat: Initial commit"], { cwd });
+  await gitPush(authUrl, "master", { cwd });
   t.log("$ semantic-release -d");
   const { stdout, exitCode } = await execa(cli, ["-d"], { env, cwd, extendEnv: false });
   t.regex(stdout, new RegExp(`There is no previous release, the next release version is ${version}`));
@@ -443,6 +449,7 @@ test('Allow local releases with "noCi" option', async (t) => {
 
   t.log("Commit a feature");
   await gitCommits(["feat: Initial commit"], { cwd });
+  await gitPush(authUrl, "master", { cwd });
   t.log("$ semantic-release --no-ci");
   const { stdout, exitCode } = await execa(cli, ["--no-ci"], { env: envNoCi, cwd, extendEnv: false });
   t.regex(stdout, new RegExp(`Published GitHub release: release-url/${version}`));
@@ -483,6 +490,7 @@ test("Pass options via CLI arguments", async (t) => {
   const version = "1.0.0";
   t.log("Commit a feature");
   await gitCommits(["feat: Initial commit"], { cwd });
+  await gitPush(authUrl, "master", { cwd });
   t.log("$ semantic-release");
   const { stdout, exitCode } = await execa(
     cli,
@@ -554,6 +562,7 @@ test("Run via JS API", async (t) => {
 
   t.log("Commit a feature");
   await gitCommits(["feat: Initial commit"], { cwd });
+  await gitPush(authUrl, "master", { cwd });
   t.log("$ Call semantic-release via API");
   await semanticRelease(undefined, {
     cwd,
@@ -582,7 +591,7 @@ test("Log unexpected errors from plugins and exit with 1", async (t) => {
   const packageName = "test-unexpected-error";
   // Create a git repository, set the current working directory at the root of the repo
   t.log("Create git repository and package.json");
-  const { cwd, repositoryUrl } = await gitbox.createRepo(packageName);
+  const { cwd, repositoryUrl, authUrl } = await gitbox.createRepo(packageName);
   // Create package.json in repository root
   await writeJson(path.resolve(cwd, "package.json"), {
     name: packageName,
@@ -594,6 +603,7 @@ test("Log unexpected errors from plugins and exit with 1", async (t) => {
   /* Initial release */
   t.log("Commit a feature");
   await gitCommits(["feat: Initial commit"], { cwd });
+  await gitPush(authUrl, "master", { cwd });
   t.log("$ semantic-release");
   const { stderr, exitCode } = await execa(cli, [], { env, cwd, reject: false, extendEnv: false });
   // Verify the type and message are logged
@@ -609,7 +619,7 @@ test("Log errors inheriting SemanticReleaseError and exit with 1", async (t) => 
   const packageName = "test-inherited-error";
   // Create a git repository, set the current working directory at the root of the repo
   t.log("Create git repository and package.json");
-  const { cwd, repositoryUrl } = await gitbox.createRepo(packageName);
+  const { cwd, repositoryUrl, authUrl } = await gitbox.createRepo(packageName);
   // Create package.json in repository root
   await writeJson(path.resolve(cwd, "package.json"), {
     name: packageName,
@@ -621,6 +631,7 @@ test("Log errors inheriting SemanticReleaseError and exit with 1", async (t) => 
   /* Initial release */
   t.log("Commit a feature");
   await gitCommits(["feat: Initial commit"], { cwd });
+  await gitPush(authUrl, "master", { cwd });
   t.log("$ semantic-release");
   const { stderr, exitCode } = await execa(cli, [], { env, cwd, reject: false, extendEnv: false });
   // Verify the type and message are logged

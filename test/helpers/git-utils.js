@@ -327,3 +327,13 @@ export async function gitAddNote(note, ref, execaOptions) {
 export async function gitGetNote(ref, execaOptions) {
   return (await execa("git", ["notes", "--ref", `${GIT_NOTE_REF}-${ref}`, "show", ref], execaOptions)).stdout;
 }
+
+/**
+ * Reset the current branch.
+ *
+ * @param {String} head A commit sha of the remote repo that will become the detached head of the new one.
+ * @param {Object} [execaOpts] Options to pass to `execa`.
+ */
+export async function gitReset(head, execaOptions) {
+  await execa("git", ["reset", "--hard", head], execaOptions);
+}
