@@ -72,6 +72,7 @@ test.serial("Pass options to semantic-release API", async (t) => {
     "fail2",
     "--debug",
     "-d",
+    "--allow-outdated-branch",
   ];
   const index = await td.replaceEsm("../index.js");
   process.argv = argv;
@@ -109,6 +110,8 @@ test.serial("Pass options to semantic-release API", async (t) => {
       success: ["success1", "success2"],
       fail: ["fail1", "fail2"],
       debug: true,
+      "allow-outdated-branch": true,
+      allowOutOfDateBranch: true,
       _: [],
       $0: "",
     })
@@ -211,6 +214,7 @@ test.serial("Do not set properties in option for which arg is not in command lin
 
   await cli();
 
+  t.false("allow-outdated-branch" in run.args[0][0]);
   t.false("ci" in run.args[0][0]);
   t.false("d" in run.args[0][0]);
   t.false("dry-run" in run.args[0][0]);
