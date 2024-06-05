@@ -604,6 +604,7 @@ test.serial('Prioritize configuration from cli/API options over "extends"', asyn
     branches: ["test_branch2"],
     tagFormat: `v\${version}`,
     plugins: false,
+    allowOutdatedBranch: false,
   };
   // Create package.json, shareable1.json and shareable2.json in repository root
   await outputJson(path.resolve(cwd, "package.json"), { release: pkgOptions });
