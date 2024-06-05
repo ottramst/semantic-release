@@ -111,7 +111,7 @@ test.serial("Pass options to semantic-release API", async (t) => {
       fail: ["fail1", "fail2"],
       debug: true,
       "allow-outdated-branch": true,
-      allowOutOfDateBranch: true,
+      allowOutdatedBranch: true,
       _: [],
       $0: "",
     })
